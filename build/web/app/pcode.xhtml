@@ -1,0 +1,174 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_pruefcodes">
+            <p:panel id="panel_pruefcodes">
+                <h3><h:outputText value="Prüfcodes"/></h3>
+                <p:dataTable var="pruefcodes" 
+                             value="#{pruefcodesHandler.getAllPruefcodes()}" 
+                             id="table_pruefcodes" 
+                             selection="#{pruefcodesHandler.selectedPruefcodes}"
+                             filteredValue="#{pruefcodesHandler.filteredPruefcodes}"
+                             rowKey="#{pruefcodes.pcid}"
+                             rows="25" 
+                             paginator="true"
+                             sortMode="multiple"
+                             widgetVar="widget_pruefcodes">
+                    <p:ajax event="rowSelect"
+                            listener="#{pruefcodesHandler.editPruefcodes()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_entity.show()"/>                
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{pruefcodesHandler.newPruefcodes()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Prüfcode" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{pruefcodesHandler.newPruefcodes()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Prüfcode" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Code" sortBy="#{pruefcodes.prCode}">
+                        <h:outputText value="#{pruefcodes.prCode}" />
+                    </p:column>
+                    <p:column headerText="Abschnitt" sortBy="#{pruefcodes.prAbschnitt}">
+                        <h:outputText value="#{pruefcodes.prAbschnitt}" />
+                    </p:column>
+                    <p:column headerText="Pflicht" sortBy="#{pruefcodes.prPflicht}">
+                        <h:outputText value="#{pruefcodes.prPflicht}" />
+                    </p:column>
+                    <p:column headerText="Art" sortBy="#{pruefcodes.prArt}">
+                        <h:outputText value="#{pruefcodes.prArt}" />
+                    </p:column>
+                    <p:column headerText="Form" sortBy="#{pruefcodes.prForm}">
+                        <h:outputText value="#{pruefcodes.prForm}" />
+                    </p:column>                    
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{pruefcodesHandler.insertOrUpdatePruefcodes()}" 
+                               style="display:none" 
+                               update=":form_pruefcodes:panel_pruefcodes,:form_pruefcodes:table_pruefcodes"/>              
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 update=":form_pruefcodes:panel_pruefcodes,:form_pruefcodes:table_pruefcodes"/>    
+            </p:panel>
+        </h:form>
+        
+        <p:dialog header="Prüfcodes" 
+                  widgetVar="dlg_new_entity" 
+                  resizable="true" 
+                  closeOnEscape="true">
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false">
+                    <p:panelGrid columns="2" style="margin-bottom:10px">
+                        <f:facet name="header">
+                            <h:outputText value="#{pruefcodesHandler.getDialogHeader()}"/>
+                        </f:facet>                          
+                        <p:outputLabel for="code" value="Code: " />
+                        <p:inputText id="code" 
+                                     value="#{pruefcodesHandler.currentPcode}" 
+                                     required="true"/>  
+                        <p:outputLabel for="abschnitt" value="Abschnitt: " />
+                        <p:inputText id="abschnitt" 
+                                     value="#{pruefcodesHandler.currentPabschnitt}" 
+                                     required="true"/>
+                        <p:outputLabel for="modul" value="Modul: " />
+                        <p:selectOneMenu id="modul"
+                                         value="#{pruefcodesHandler.currentModul}" 
+                                         required="true" 
+                                         onchange="this.blur()">
+                            <f:selectItem itemValue="#{pruefcodesHandler.currentModul}" 
+                                          itemLabel="#{pruefcodesHandler.currentModul != null ?
+                                                        pruefcodesHandler.currentModul.modName : 
+                                                        'Bitte wählen...'}"/>
+                            <f:selectItems value="#{modulHandler.modul}" 
+                                           var="m" 
+                                           itemValue="#{m}"
+                                           itemLabel="#{m.modName}"/>
+                        </p:selectOneMenu>                          
+                        <p:outputLabel for="pflicht" value="Pflicht: " />
+                        <p:inputText id="pflicht" 
+                                     value="#{pruefcodesHandler.currentPpflicht}"/>                              
+                        <p:outputLabel for="art" value="Art: " />
+                        <p:inputText id="art" 
+                                     value="#{pruefcodesHandler.currentPart}"/> 
+                        <p:outputLabel for="form" value="Form: " />
+                        <p:inputText id="form" 
+                                     value="#{pruefcodesHandler.currentPform}"/>    
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                             oncomplete="handleInsertSimple(args,'form_pruefcodes')"
+                                             update=":dialogPanel"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen"
+                                             onclick="dlg_new_entity.hide()" 
+                                             icon="ui-icon-close"
+                                             type="button"/>  
+                        </f:facet>
+                     </p:panelGrid>
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Prüfcodes wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" 
+                            value="#{pruefcodesHandler.selectedPruefcodes}" 
+                            var="pc"
+                            paginator="true"
+                            rows="5">  
+                    <h:outputText value="#{pruefcodesHandler.getAsString(pc)}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm"
+                                 value="Ja" 
+                                 action="#{pruefcodesHandler.deletePruefcodes()}" 
+                                 oncomplete="handleDelete('form_pruefcodes')"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()" 
+                                 type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>
+      
+    </ui:define>
+</ui:composition>
+

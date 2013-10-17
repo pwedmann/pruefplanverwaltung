@@ -1,0 +1,15 @@
+.dontPrint{
+    width: 0px;
+    height: 0px;
+    display: none; 
+    visibility: hidden;
+}
+body{
+    font-size: 11px;
+}
+#table_print1{
+    border: none;
+}
+#form_print:table_print1{
+    font-size: 5px;
+}

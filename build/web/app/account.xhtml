@@ -1,0 +1,154 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_accounts">
+            <p:panel id="panel_accounts">
+                <h3><h:outputText value="Accounts"/></h3>
+                <p:dataTable var="accounts" 
+                             value="#{accountsHandler.getAllAccounts()}" 
+                             id="table_accounts" 
+                             selection="#{accountsHandler.selectedAccounts}"
+                             filteredValue="#{accountsHandler.filteredAccounts}"
+                             rowKey="#{accounts.accID}"
+                             rows="25" 
+                             paginator="true"
+                             sortMode="multiple"
+                             widgetVar="widget_accounts">
+                    <p:ajax event="rowSelect"
+                            listener="#{accountsHandler.editAccounts()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_entity.show()"/>                
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{accountsHandler.newAccounts()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Account" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{accountsHandler.newAccounts()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Account" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Benutzername" 
+                              sortBy="#{accounts.accName}">
+                        <h:outputText value="#{accounts.accName}" />
+                    </p:column>
+                    <p:column headerText="Benutzergruppe" 
+                              sortBy="#{accounts.groupID.BGName}">
+                        <h:outputText value="#{accounts.groupID.BGName}" />
+                    </p:column>
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{accountsHandler.insertOrUpdateAccounts()}" 
+                               style="display:none" 
+                               update=":form_accounts:panel_accounts,:form_accounts:table_accounts"/>              
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 update=":form_accounts:panel_accounts,:form_accounts:table_accounts"/>    
+            </p:panel>
+        </h:form>
+        
+        <p:dialog header="Accounts" 
+                  widgetVar="dlg_new_entity" 
+                  resizable="true" 
+                  closeOnEscape="true">
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false"> 
+                    <p:panelGrid columns="2" style="margin-bottom:10px">
+                        <f:facet name="header">
+                            <h:outputText value="#{accountsHandler.getDialogHeader()}"/>
+                        </f:facet>                        
+                        <p:outputLabel for="name" value="Benutzername: " />
+                        <p:inputText id="name" 
+                                     value="#{accountsHandler.currentAccName}"
+                                     required="true"/> 
+                        <p:outputLabel for="password" value="Password: " />
+                        <p:outputPanel>
+                        <h:inputSecret value="#{accountsHandler.currentPassword}"
+                                       id="password"/>
+                        <h:outputText value=" (default: 123)" rendered="#{accountsHandler.currentAccounts == null}"/>
+                        </p:outputPanel>
+                        <p:outputLabel for="group" value="Benutzergruppe: " />
+                        <p:selectOneMenu id="group" 
+                                         value="#{accountsHandler.currentBenutzergruppe}">
+                            <f:selectItems value="#{benutzergruppeHandler.benutzergruppe}" 
+                                           var="bg" 
+                                           itemValue="#{bg}"
+                                           itemLabel="#{bg.BGName}"/>
+                        </p:selectOneMenu>
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                             oncomplete="handleInsertSimple(args,'form_accounts')"
+                                             update=":dialogPanel"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                            onclick="dlg_new_entity.hide()" 
+                                            icon="ui-icon-close"
+                                            type="button"/>     
+                        </f:facet>
+                     </p:panelGrid>
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Accounts wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" 
+                            value="#{accountsHandler.selectedAccounts}" 
+                            var="acc"
+                            paginator="true"
+                            rows="5">  
+                    <h:outputText value="#{acc.accName}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm"
+                                 value="Ja" 
+                                 action="#{accountsHandler.deleteAccounts()}" 
+                                 oncomplete="handleDelete('form_accounts')"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()" 
+                                 type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>
+      
+    </ui:define>
+</ui:composition>
+

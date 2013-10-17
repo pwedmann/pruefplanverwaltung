@@ -1,0 +1,125 @@
+/*---------------------------------GLOBAL STYLES------------------------------*/
+.entity_table{
+    border: solid 1px white;
+}
+
+.odd{
+    background-color: whitesmoke;
+}
+
+.even{
+    background-color: white;
+}
+
+html,body {
+	margin: 0;
+	padding: 0
+}
+
+body, input, select{
+	font-family: Helvetica;
+	font-weight:normal; 
+	font-size:90%;
+}
+
+.calendar_table td{
+    text-align: center;
+    width:110px;
+}
+
+.calendar_table_wrap_column{
+    min-width:100%;
+    min-height:50px;
+    text-align:left;
+    font-size: 12px;
+    border-color: white !important;
+}
+.day{
+    width:49%;
+    height:60px;
+    border:none;
+    margin-right:10%;
+}
+.time{
+    width:10%;
+    height:460px;
+    margin:0;
+    border:none;
+    background:none;
+}
+.button_updateCalendar{
+    height:30px;
+}
+/*---------------------------------DIVS---------------------------------------*/
+/*HEADER*/
+.header h1 {
+    text-align: right;
+    text-shadow: aqua;
+    margin: 5px;
+}
+.header, .header .ui-layout, .header .ui-layout-bd, .header .ui-layout-unit-content {
+    background-image: url("/pruefplanverwaltung/resources/img/fh-bielefeld-logo-grey2.png"); 
+    background-repeat: no-repeat;
+}
+
+/*CONTENT*/
+div#content {
+	padding-left: 30px;
+        padding-top:0px;
+        padding-right:30px;
+        min-width:1400px;
+}
+/*FOOTER*/
+.footer, .footer .ui-layout, .footer .ui-layout-bd, .footer .ui-layout-unit-content {
+    background-color: #333 !important; 
+    color: #FFF;
+}
+.footer h3{
+    padding-left: 20px;
+    height:10px;margin-top:0px;
+}
+/*---------------------------------CLASSES------------------------------------*/
+/*------------------------------ENTITY TABLES---------------------------------*/
+.entity_add, 
+.entity_remove, 
+.ui-widget-content .entity_add,
+.ui-widget-content .entity_remove {
+    height:30px;
+    font-size: 12px;
+}
+
+.entity_table_header {
+    margin-left: -5px;
+    text-align: left;
+}
+
+.edit_ppe {
+    height: 15px;
+    width: 10px;
+    float:right;
+}
+
+.dialog_new_ppe {
+    min-width:500px;
+}
+
+.filter_pruefperioden {
+    min-width: 220px;
+}
+.filter_studiengang {
+    max-width: 55px;
+}
+
+.conflict{
+    background-color: orange;
+}
+
+.printRow{
+    background: white;
+    border:none;
+}
+
+.printTable{
+    max-width: 1000px; 
+    border:solid 1px black;
+}

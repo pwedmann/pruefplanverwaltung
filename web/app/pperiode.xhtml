@@ -1,0 +1,173 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_pruefperioden">
+            <p:panel id="panel_pruefperioden">
+                <h3><h:outputText value="Prüfperioden"/></h3>
+                <p:dataTable var="pruefperioden" 
+                             value="#{pruefperiodenHandler.getAllPruefperioden()}" 
+                             id="table_pruefperioden" 
+                             selection="#{pruefperiodenHandler.selectedPruefperioden}"
+                             filteredValue="#{pruefperiodenHandler.filteredPruefperioden}"
+                             rowKey="#{pruefperioden.prPeID}"
+                             rows="25" 
+                             paginator="true"
+                             sortMode="multiple"
+                             widgetVar="widget_pruefperioden">
+                    <p:ajax event="rowSelect"
+                            listener="#{pruefperiodenHandler.editPruefperioden()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_entity.show()"/>                
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{pruefperiodenHandler.newPruefperioden()}"
+                                             styleClass="entity_add" 
+                                             value="Neue Prüfperiode" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{pruefperiodenHandler.newPruefperioden()}"
+                                             styleClass="entity_add" 
+                                             value="Neue Prüfperiode" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Semester" 
+                              sortBy="#{pruefperioden.pruefSemester}">
+                        <h:outputText value="#{pruefperioden.pruefSemester}" />
+                    </p:column>
+                    <p:column headerText="Jahr" 
+                              sortBy="#{pruefperioden.PPJahr}">
+                        <h:outputText value="#{pruefperioden.PPJahr}" />
+                    </p:column>
+                    <p:column headerText="Termin" 
+                              sortBy="#{pruefperioden.pruefTermin}">
+                        <h:outputText value="#{pruefperioden.pruefTermin}" />
+                    </p:column>
+                    <p:column headerText="erste KW" 
+                              sortBy="#{pruefperioden.PPKw}">
+                        <h:outputText value="#{pruefperioden.PPKw}" />
+                    </p:column>    
+                    <p:column headerText="zweite KW" 
+                              sortBy="#{pruefperioden.PPotherKw}">
+                        <h:outputText value="#{pruefperioden.PPotherKw}" />
+                    </p:column>
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{pruefperiodenHandler.insertOrUpdatePruefperioden()}" 
+                               style="display:none" 
+                               update=":form_pruefperioden:panel_pruefperioden,:form_pruefperioden:table_pruefperioden"/>              
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 update=":form_pruefperioden:panel_pruefperioden,:form_pruefperioden:table_pruefperioden"/>    
+            </p:panel>
+        </h:form>
+        
+        <p:dialog header="Pruefperioden" 
+                  widgetVar="dlg_new_entity" 
+                  resizable="true" 
+                  closeOnEscape="true">
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false"> 
+                    <p:panelGrid columns="2" style="margin-bottom:10px">
+                        <f:facet name="header">
+                            <h:outputText value="#{pruefperiodenHandler.getDialogHeader()}"/>
+                        </f:facet>  
+                        <p:outputLabel for="ppdate" value="Ein Tag aus der ersten Woche: " />
+                        <p:calendar id="ppdate"
+                                       value="#{pruefperiodenHandler.currentDate}" 
+                                       required="true"
+                                       pattern="dd/MM/yyyy"
+                                       locale="de"
+                                       showWeek="true"/>  
+                        <p:outputLabel for="ppsemester" value="Semester: " />
+                        <p:selectOneMenu id="ppsemester" 
+                                        value="#{pruefperiodenHandler.currentSemester}"
+                                        onchange="this.blur()">
+                          <f:selectItems value="#{pruefperiodenHandler.getSemester().entrySet()}"
+                                         var="entry"
+                                         itemValue="#{entry.key}" 
+                                         itemLabel="#{entry.value}"/>
+                        </p:selectOneMenu> 
+                        <p:outputLabel for="pptermin" value="Termin: " />
+                        <p:selectOneMenu id="pptermin" 
+                                         value="#{pruefperiodenHandler.currentTermin}"
+                                         onchange="this.blur()">
+                            <f:selectItems value="#{pruefperiodenHandler.getTermin().entrySet()}"
+                                          var="entry"
+                                          itemValue="#{entry.key}" 
+                                          itemLabel="#{entry.value}"/>
+                        </p:selectOneMenu>    
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                             oncomplete="handleInsertSimple(args,'form_pruefperioden')"
+                                             update=":dialogPanel"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                            onclick="dlg_new_entity.hide()" 
+                                            icon="ui-icon-close"
+                                            type="button"/>     
+                        </f:facet>
+                     </p:panelGrid>
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Prüfperioden wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" 
+                            value="#{pruefperiodenHandler.selectedPruefperioden}" 
+                            var="pp"
+                            paginator="true"
+                            rows="5">  
+                    <h:outputText value="#{pruefperiodenHandler.getAsString(pp)}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm"
+                                 value="Ja" 
+                                 action="#{pruefperiodenHandler.deletePruefperioden()}" 
+                                 oncomplete="handleDelete('form_pruefperioden')"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()" 
+                                 type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>
+      
+    </ui:define>
+</ui:composition>
+

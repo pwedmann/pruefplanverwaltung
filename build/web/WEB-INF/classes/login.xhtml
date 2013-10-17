@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui"
+    template="template.xhtml">
+    
+    <ui:define name="content">
+        <h:form prependId="false">  
+            <p:messages id="messages" autoUpdate="true" closable="true"/> 
+            <h3><h:outputText value="Anmeldung"/></h3>
+            <h:panelGrid columns="2">
+                <h:outputLabel value="Benutzername:" for="user" />
+                <p:inputText id="user" 
+                             value="#{sessionManager.accName}"
+                             requiredMessage="Bitte Benutzername eingeben" />
+                <h:outputLabel value="Passwort:" for="password" />
+                <p:password id="password" 
+                            value="#{sessionManager.accPwd}"
+                            required="true" 
+                            requiredMessage="Bitte Passwort eingeben" />
+                <h:panelGroup />
+                <p:commandButton action="#{sessionManager.login}" 
+                                 value="Anmelden"
+                                 update="messages"/>
+            </h:panelGrid>  
+        </h:form>  
+    </ui:define>
+</ui:composition>

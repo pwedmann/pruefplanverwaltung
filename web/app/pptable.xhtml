@@ -1,0 +1,347 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui"
+    template="../template.xhtml">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_ppTable">
+            <p:panel id="panel_ppTable">
+                <h3><h:outputText value="Prüfplantabelle"/></h3>
+                <p:dataTable var="ppe" 
+                             value="#{pruefplaneintragHandler.getAllPpe()}" 
+                             id="table_ppTable" 
+                             selection="#{pruefplanTabelleHandler.selectedPPEs}"
+                             filteredValue="#{pruefplanTabelleHandler.filteredPPEs}"
+                             rowKey="#{ppe.ppid}"
+                             rows="25" 
+                             paginator="true"
+                             sortMode="multiple"
+                             rowStyleClass="#{ppe.existingConflicts.size()==0 ? null : 'conflict'}"
+                             widgetVar="widget_ppTable">
+                    <p:ajax event="rowSelect"
+                            listener="#{pruefplanKalenderHandler.editPPE()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_ppe.show()"/>
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-plusthick"  
+                                             styleClass="entity_remove" 
+                                             value="Neuer Prüfplaneintrag" 
+                                             action="#{pruefplanKalenderHandler.newEmptyPPE()}"
+                                             update=":dialogPanel"
+                                             onclick="dlg_new_ppe.show()"/>
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             oncomplete="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-plusthick"  
+                                             onclick="dlg_new_ppe.show()"
+                                             styleClass="entity_remove" 
+                                             value="Neuer Prüfplaneintrag" 
+                                             update=":dialogPanel"
+                                             actionListener="#{pruefplanKalenderHandler.newEmptyPPE()}"/>
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Datum-Zeit" sortBy="#{ppe.PPEDatZeit}">
+                        <h:outputText value="#{pruefplanTabelleHandler.getDatZeit(ppe)}"/>
+                    </p:column>
+                    <p:column headerText="Prüfperiode" 
+                              filterBy="#{pruefplanTabelleHandler.filterBy(ppe)}"
+                              filterOptions="#{pruefplanTabelleHandler.pruefperiodenOptions}"
+                              filterMatchMode="exact" transient="true"
+                              filterStyleClass="filter_pruefperioden"
+                              filterValue="2">
+                        <h:outputText value="#{pruefplanTabelleHandler.getPruefperiode(ppe.getPruefPeriode())}"/>
+                    </p:column>
+                    <p:column headerText="Studiengang" 
+                              filterBy="#{ppe.sgmid.sgid.SGName}"
+                              filterOptions="#{pruefplanTabelleHandler.studiengangOptions}"
+                              filterMatchMode="exact" transient="true"
+                              filterStyleClass="filter_studiengang"
+                               style="text-align: center">
+                        <h:outputText value="#{ppe.sgmid.sgid.SGKurz}" />
+                    </p:column>
+                    <p:column headerText="Modul" sortBy="#{ppe.sgmid.modID.modName}">
+                        <h:outputText value="#{ppe.sgmid.modID.modName} (#{ppe.sgmid.modID.modKuerzel})" />
+                    </p:column> 
+                    <p:column headerText="Prüfer" sortBy="#{ppe.erstPruefID.prName}">
+                        <h:outputText escape="false" 
+                                      value="#{pruefplanTabelleHandler.getPruefer(ppe)}" /> 
+                    </p:column>                
+                    <p:column headerText="Prüfingsform" sortBy="#{ppe.pfid.pfid}">
+                        <h:outputText value="#{pruefplanTabelleHandler.getPfDauer(ppe)}" />
+                    </p:column>                
+                    <p:column headerText="Raum" 
+                              sortBy="#{ppe.rid.RName}"
+                              style="text-align: center">
+                        <h:outputText value="#{ppe.rid.RName}" />
+                    </p:column>                
+                    <p:column headerText="Anmeldezahl" style="text-align: center">
+                        <h:outputText value="#{ppe.anmeldeZahl}" />
+                    </p:column>                
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{pruefplaneintragHandler.insertOrUpdatePPE()}" 
+                               style="display:none" 
+                               onsuccess="widget_ppTable.filter();"
+                               update=":form_ppTable:panel_ppTable,:form_ppTable:table_ppTable"/> 
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 onsuccess="widget_ppTable.filter();"
+                                 update=":form_ppTable:panel_ppTable,:form_ppTable:table_ppTable"/>                
+            </p:panel>
+        </h:form>
+         
+        <p:dialog header="Stundenplaneintrag"
+                  widgetVar="dlg_new_ppe"
+                  resizable="true" 
+                  dynamic="true"
+                  closeOnEscape="true">  
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false">
+                    <p:panelGrid columns="2" 
+                                 style="margin-bottom:10px;" 
+                                 styleClass="panelGrid_new_ppe">
+                        <f:facet name="header">
+                            <p:selectOneMenu id="conflictPPE" 
+                                             rendered="#{pruefplanKalenderHandler.render()}"
+                                             value="#{pruefplanKalenderHandler.selectedConflictPPE}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.switchPPE()}"
+                                        update=":dialogPanel"/>
+                                <f:selectItem itemValue="" 
+                                              itemLabel="--- Es gibt Konflikte ---"
+                                              noSelectionOption="true"/>                            
+                                <f:selectItems value="#{pruefplanKalenderHandler.existingConflicts}" 
+                                               var="conflict" 
+                                               itemValue="#{conflict}"
+                                               itemLabel="#{conflict.sgmid.modID.modName} am #{conflict.PPEDatZeit.toString()}"/>
+                            </p:selectOneMenu> 
+                            <h:outputText value="Keine Konflikte" rendered="#{!pruefplanKalenderHandler.render()}" />
+                        </f:facet>
+                        
+                        <p:outputLabel for="sgAndSem" value="Studiengang/Semester: "/>  
+                        <p:outputPanel id="sgAndSem">
+                            <p:selectOneMenu id="sgNew"
+                                             value="#{pruefplanKalenderHandler.currentStudiengang}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.updateSgmodul}"/>
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        update="sgmodul,pruefungsform,erstpruefer"
+                                        listener="#{pruefplanKalenderHandler.updateErstpruefer()}"/> 
+                                <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                                <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                               var="sgNew" 
+                                               itemValue="#{sgNew}"
+                                               itemLabel="#{sgNew.SGName}"/>
+                            </p:selectOneMenu>    
+                            <p:selectOneMenu id="semNew"
+                                             value="#{pruefplanKalenderHandler.currentSemester}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.updateSgmodul}"/>
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        update="sgmodul,pruefungsform,erstpruefer"
+                                        listener="#{pruefplanKalenderHandler.updateErstpruefer()}"/> 
+                                <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                                <f:selectItems value="#{pruefplanKalenderHandler.semester}"/>
+                            </p:selectOneMenu>                             
+                        </p:outputPanel>                        
+                        <p:outputLabel for="sgmodul" value="Modul: " />  
+                        <p:selectOneMenu id="sgmodul"
+                                         value="#{pruefplanKalenderHandler.currentSgmodul}" 
+                                         required="true"
+                                         onchange="this.blur()">
+                            <p:ajax process="@this"
+                                    partialSubmit="true"
+                                    listener="#{pruefplanKalenderHandler.updateErstpruefer}"
+                                    update="erstpruefer"/>
+                            <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                            <f:selectItems value="#{pruefplanKalenderHandler.currentModule}" 
+                                           var="sgmodul" 
+                                           itemValue="#{sgmodul}"
+                                           itemLabel="#{sgmodul != null ? sgmodul.modID.modName : ''}"/>
+                        </p:selectOneMenu>                        
+                        <p:outputLabel for="pruefperiode" value="Prüfperiode:" />  
+                        <p:selectOneMenu id="pruefperiode"
+                                         value="#{pruefplanKalenderHandler.currentPruefperiode}"
+                                         required="true"
+                                         requiredMessage="Prüfperiode ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <p:ajax process="@this"
+                                    partialSubmit="true"
+                                    listener="#{pruefplanKalenderHandler.updateMinMaxDate()}"
+                                    update="date"/>
+                            <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                            <f:selectItems value="#{pruefperiodenHandler.pruefperioden}" 
+                                           var="pp" 
+                                           itemValue="#{pp}"
+                                           itemLabel="#{pp != null ? pruefperiodenHandler.getAsString(pp) : ''}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel for="date" value="Prüfungstermin: " />  
+                        <p:calendar id="date" 
+                                    stepHour="1" 
+                                    stepMinute="5" 
+                                    minHour="8" 
+                                    maxHour="18"
+                                    showButtonPanel="true" 
+                                    pattern="dd/MM/yyyy HH:mm" 
+                                    value="#{pruefplanKalenderHandler.currentPPEDatZeit}" 
+                                    mindate="#{pruefplanKalenderHandler.minDate}"
+                                    maxdate="#{pruefplanKalenderHandler.maxDate}"
+                                    required="true"
+                                    requiredMessage="Prüfungstermin ist ein Pflichtfeld"
+                                    locale="de"
+                                    showWeek="true"/>                        
+                        <p:outputLabel for="erstpruefer" value="Erstprüfer:" />  
+                        <p:selectOneMenu id="erstpruefer"
+                                         value="#{pruefplanKalenderHandler.currentErstPruefID}" 
+                                         required="true" 
+                                         requiredMessage="Erstprüfer ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <f:selectItem itemValue="#{pruefplanKalenderHandler.currentSgmodul == null ?
+                                                    '' : pruefplanKalenderHandler.currentSgmodul.prID}" 
+                                          itemLabel="#{pruefplanKalenderHandler.currentSgmodul != null ?
+                                                        prueferHandler.getAsString(pruefplanKalenderHandler.currentSgmodul.prID) : 
+                                                        'Bitte wählen...'}"/>
+                            <f:selectItems value="#{prueferHandler.pruefer}" 
+                                           var="pr1" 
+                                           itemValue="#{pr1}"
+                                           itemLabel="#{prueferHandler.getAsString(pr1)}"/>
+                        </p:selectOneMenu>    
+                        <p:outputLabel for="zweitpruefer" value="Zweitprüfer:" />
+                        <p:selectOneMenu id="zweitpruefer"
+                                         value="#{pruefplanKalenderHandler.currentZweitPruefID}"
+                                         onchange="this.blur()">
+                            <f:selectItem itemLabel="n/a" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{prueferHandler.pruefer}" 
+                                           var="pr2" 
+                                           itemValue="#{pr2}"
+                                           itemLabel="#{prueferHandler.getAsString(pr2)}"/>
+                        </p:selectOneMenu>                         
+                        <p:outputLabel for="raum" value="Raum: " />  
+                        <p:selectOneMenu id="raum"
+                                         value="#{pruefplanKalenderHandler.currentRid}"
+                                         onchange="this.blur()">
+                            <f:selectItem itemValue="" itemLabel="n/a" noSelectionOption="true"/>
+                            <f:selectItems value="#{raumHandler.raum}" 
+                                           var="ra" 
+                                           itemValue="#{ra}"
+                                           itemLabel="#{ra.RName}"/>
+                        </p:selectOneMenu>  
+                        <p:outputLabel for="anmeldezahl" value="Anmeldezahl:" />
+                        <p:inputText id="anmeldezahl" value="#{pruefplanKalenderHandler.currentAnmeldeZahl}"/>
+                        <p:outputLabel for="pruefungsform" value="Prüfungsform:" />  
+                        <p:selectOneMenu id="pruefungsform"
+                                         value="#{pruefplanKalenderHandler.currentPfid}" 
+                                         required="true"
+                                         requiredMessage="Prüfungsform ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                            <f:selectItems value="#{pruefungsformHandler.pruefungsform}" 
+                                           var="pf" 
+                                           itemValue="#{pf}"
+                                           itemLabel="#{pf.PForm}"/>
+                        </p:selectOneMenu>                         
+                        <p:outputLabel for="anmerkung" value="Anmerkung:" />
+                        <p:inputTextarea id="anmerkung"/>
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                             actionListener="#{pruefplanKalenderHandler.findConflicts()}"
+                                             oncomplete="handleInsert(xhr, status, args, 'form_ppTable')"
+                                             update=":form_confirm_insert,:dialogPanel"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                             update=":dialogPanel"
+                                             oncomplete="dlg_new_ppe.hide()" 
+                                             icon="ui-icon-close"
+                                             partialSubmit="true"
+                                             process="@all"/>
+                        </f:facet>
+                    </p:panelGrid>  
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>        
+        
+        <p:confirmDialog id="confirmInsert" 
+                         header="Prüfungen überschneiden sich"
+                         message="Unter Vorbehalt eintragen?"  
+                         severity="alert" 
+                         widgetVar="dlg_confirm_insert" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_insert">
+                <h:outputText value="Konflikt mit: "/>
+                <p:dataList id="displayMulti" value="#{pruefplanKalenderHandler.newConflicts}" var="conflictPPE">
+                    <h:outputText escape="false"
+                                  value="#{conflictPPE.sgmid.modID.modName} 
+                                  bei #{conflictPPE.erstPruefID.prName} #{conflictPPE.erstPruefID.prVorname}
+                                  am #{conflictPPE.PPEDatZeit.toString()}" 
+                    />
+                </p:dataList> 
+                <p:commandButton id="confirm" value="Ja" 
+                                 oncomplete="dlg_confirm_insert.hide();handleInsert(xhr, status, args, 'form_ppTable')"
+                                 icon="ui-icon-check"/> 
+                <p:commandButton id="decline" value="Nein" 
+                                 onclick="dlg_confirm_insert.hide()" type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>        
+        
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Prüfplaneinträge wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" value="#{pruefplanTabelleHandler.selectedPPEs}" var="p">  
+                    <h:outputText value="#{p.sgmid.modID.modName} am #{pruefplanTabelleHandler.getDatZeit(p)}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm" 
+                                 value="Ja" 
+                                 oncomplete="handleDelete('form_ppTable');"  
+                                 action="#{pruefplaneintragHandler.deletePPEs()}"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()"
+                                 update=":dialogPanel"
+                                 type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>        
+        <p:growl id="growl" showDetail="false" life="3000" autoUpdate="true"/>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml">
+    <ui:define name="navi">
+        <ui:include src="navi_standard.xhtml"/>
+    </ui:define>
+    <ui:define name="content">    
+        <h3>Hier können Sie folgendes nutzen:</h3>
+        <h4>Prüfplankalender/Prüfplantabelle:</h4>
+        <ul>
+            <li>neue Prüfeinträge erstellen</li>
+            <li>existierende Prüfeinträge ändern</li>
+            <li>Information über angemeldete Prüfungen anschauen</li>
+        </ul>
+        <h4>Druckvorschau:</h4>
+        <ul>
+            <li>Druckansicht der Prüfeinträge in gewählter Prüfperiode und Studiengang </li>
+        </ul>
+        <span  style="font-style: italic">
+            <h3>Coming soon:</h3>
+            <h4>Übertragen:</h4>
+            <ul>
+                <li>alte Prüfeinträge in neue Prüfperioden übertragen </li>
+            </ul>
+            <h4>Prüfplan-Check:</h4>
+            <ul>
+                <li>Vollständigkeitsprüfung der Prüfeinträge in gewählter Prüfperiode und Studiengang</li>
+            </ul>
+            <h4>Suchen:</h4>
+            <ul>
+                <li>Suche im Prüfplan und den Verwaltungsoptionen</li>
+            </ul>
+        </span>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,555 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui"
+    template="../template.xhtml">
+    
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        
+        
+        
+        
+        <h:form id="form_ppeCalendar">  
+            <p:panel id="panel_ppeCalendar">
+                <h3><h:outputText value="Prüfplankalender"/></h3>
+                <h:panelGroup style="width:49%;min-width:600px;display:inline-block;margin-right:5px">
+                    <h:panelGrid columns="4">
+                        <p:selectOneMenu id="pperiode" 
+                                         value="#{pruefplanKalenderHandler.firstWeekPruefperiode}">
+                            <f:selectItems value="#{pruefperiodenHandler.getPruefperiodenByWeek(1)}" 
+                                           var="pperiode" 
+                                           itemValue="#{pperiode}"
+                                           itemLabel="#{pperiode.pruefSemester} #{pperiode.PPJahr} #{pperiode.pruefTermin}"/>
+                        </p:selectOneMenu>
+                        <p:selectOneMenu id="semester"
+                                         value="#{pruefplanKalenderHandler.firstWeekSemester}">
+                            <f:selectItems value="#{pruefplanKalenderHandler.semester}"/>
+                        </p:selectOneMenu>                
+                        <p:selectOneMenu id="studiengang"
+                                         value="#{pruefplanKalenderHandler.firstWeekStudiengang}">
+                            <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                           var="sg" 
+                                           itemValue="#{sg}"
+                                           itemLabel="#{sg.SGName}"/>
+                        </p:selectOneMenu>  
+                        <p:commandButton actionListener="#{pruefplanKalenderHandler.updateWeek(1)}"
+                                         update="calendarLeft"
+                                         process="@this,pperiode,semester,studiengang"
+                                         partialSubmit="false"
+                                         onclick="this.blur()"
+                                         styleClass="entity_add" 
+                                         icon="ui-icon-refresh"
+                                         value="Aktualisieren"/>
+                    </h:panelGrid> 
+                    <p:dataTable var="time" value="#{pruefplanKalenderHandler.time}" styleClass="calendar_table" rowIndexVar="row" id="calendarLeft">
+                        <f:facet name="header"><h:outputText value="1. Prüfungswoche"/></f:facet> 
+                        <p:column headerText="Uhrzeit" style="width:50px;">  
+                            <h:outputText value="#{time}:00"/>  
+                        </p:column>
+                        <p:column headerText="Mo #{pruefplanKalenderHandler.findPPDates(1,1)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarLeft',#{row},1)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(1,1,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,1,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn1" 
+                                               style="display:none"
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(1,1,time)}" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,1,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(1,1,time)}"
+                                                 update="calendarLeft"/>                                
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(1,1,time)}" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,1,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(1,1,time)}"/>                         
+                            </div>
+                        </p:column> 
+                        <p:column headerText="Di #{pruefplanKalenderHandler.findPPDates(1,2)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarLeft',#{row},2)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(1,2,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,2,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn2" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(1,2,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,2,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(1,2,time)}"
+                                                 update="calendarLeft"/>                                
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,2,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(1,2,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(1,2,time)}"/>  
+                            </div>
+                        </p:column>
+                        <p:column headerText="Mi #{pruefplanKalenderHandler.findPPDates(1,3)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarLeft',#{row},3)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(1,3,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,3,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn3" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(1,3,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,3,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(1,3,time)}"
+                                                 update="calendarLeft"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,3,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(1,3,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>      
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(1,3,time)}"/>  
+                            </div>
+                        </p:column>
+                        <p:column headerText="Do #{pruefplanKalenderHandler.findPPDates(1,4)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarLeft',#{row},4)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(1,4,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,4,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn4" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(1,4,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,4,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(1,4,time)}"
+                                                 update="calendarLeft"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,4,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(1,4,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                   
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(1,4,time)}"/> 
+                            </div>
+                        </p:column>
+                        <p:column headerText="Fr #{pruefplanKalenderHandler.findPPDates(1,5)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarLeft',#{row},5)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(1,5,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,5,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn5" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(1,5,time)}" 
+                                               style="display:none"
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,5,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(1,5,time)}"
+                                                 update="calendarLeft"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(1,5,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(1,5,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                 
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(1,5,time)}"/>  
+                            </div>
+                        </p:column>                
+                    </p:dataTable> 
+                </h:panelGroup>
+                <h:panelGroup style="width:49%;min-width:600px;display:inline-block;margin-right:5px">
+                    <h:panelGrid columns="4">
+                        <p:selectOneMenu id="pperiode2" 
+                                         value="#{pruefplanKalenderHandler.secondWeekPruefperiode}">
+                            <f:selectItems value="#{pruefperiodenHandler.getPruefperiodenByWeek(2)}" 
+                                           var="pperiode" 
+                                           itemValue="#{pperiode}"
+                                           itemLabel="#{pperiode.pruefSemester} #{pperiode.PPJahr} #{pperiode.pruefTermin}"/>
+                        </p:selectOneMenu>
+                        <p:selectOneMenu id="semester2"
+                                         value="#{pruefplanKalenderHandler.secondWeekSemester}">
+                            <f:selectItems value="#{pruefplanKalenderHandler.semester}" noSelectionValue="1"/>
+                        </p:selectOneMenu>                
+                        <p:selectOneMenu id="studiengang2"
+                                         value="#{pruefplanKalenderHandler.secondWeekStudiengang}">
+                            <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                           var="sg" 
+                                           itemValue="#{sg}"
+                                           itemLabel="#{sg.SGName}"/>
+                        </p:selectOneMenu>  
+                        <p:commandButton actionListener="#{pruefplanKalenderHandler.updateWeek(2)}"
+                                         update="calendarRight"
+                                         process="@this,pperiode2,semester2,studiengang2"
+                                         partialSubmit="true"
+                                         onclick="this.blur()"
+                                         styleClass="entity_add" 
+                                         icon="ui-icon-refresh"
+                                         value="Aktualisieren"/>
+                    </h:panelGrid> 
+                    <p:dataTable var="time" value="#{pruefplanKalenderHandler.time}" styleClass="calendar_table" rowIndexVar="row" id="calendarRight">
+                        <f:facet name="header"><h:outputText value="2. Prüfungswoche"/></f:facet> 
+                        <p:column headerText="Uhrzeit" style="width:50px;">  
+                            <h:outputText value="#{time}:00"/>  
+                        </p:column>
+                        <p:column headerText="Mo #{pruefplanKalenderHandler.findPPDates(2,1)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarRight',#{row},6)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(2,1,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,1,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn6" 
+                                               style="display:none"
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(2,1,time)}" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,1,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(2,1,time)}"
+                                                 update="calendarRight"/>                                
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(2,1,time)}" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,1,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(2,1,time)}"/>                         
+                            </div>
+                        </p:column> 
+                        <p:column headerText="Di #{pruefplanKalenderHandler.findPPDates(2,2)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarRight',#{row},7)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(2,2,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,2,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn7" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(2,2,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,2,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(2,2,time)}"
+                                                 update="calendarRight"/>                                
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,2,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(2,2,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(2,2,time)}"/>  
+                            </div>
+                        </p:column>
+                        <p:column headerText="Mi #{pruefplanKalenderHandler.findPPDates(2,3)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarRight',#{row},8)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(2,3,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,3,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn8" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(2,3,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,3,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(2,3,time)}"
+                                                 update="calendarRight"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,3,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(2,3,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>      
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(2,3,time)}"/>  
+                            </div>
+                        </p:column>
+                        <p:column headerText="Do #{pruefplanKalenderHandler.findPPDates(2,4)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarRight',#{row},9)">
+                                <p:button disabled="true" style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(2,4,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,4,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn9" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(2,4,time)}" 
+                                               style="display:none" 
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,4,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(2,4,time)}"
+                                                 update="calendarRight"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,4,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(2,4,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                   
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(2,4,time)}"/> 
+                            </div>
+                        </p:column>
+                        <p:column headerText="Fr #{pruefplanKalenderHandler.findPPDates(2,5)}">
+                            <div class="calendar_table_wrap_column" ondblclick="newEntry('calendarRight',#{row},10)">
+                                <p:button disabled="true" 
+                                          style="width:100%;height:3px;background: #{pruefplanKalenderHandler.findPPEColor(2,5,time)}" 
+                                                 value=""
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,5,time)}"/><br/>
+                                <p:commandLink id="hiddenBtn10" 
+                                               actionListener="#{pruefplanKalenderHandler.newPPE(2,5,time)}" 
+                                               style="display:none"
+                                               update=":dialogPanel" 
+                                               onsuccess="dlg_new_ppe.show()"/>
+                                <p:commandButton icon="ui-icon-close" 
+                                                 styleClass="edit_ppe" 
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,5,time)}"
+                                                 actionListener="#{pruefplaneintragHandler.deletePPE(2,5,time)}"
+                                                 update="calendarRight"/>
+                                <p:commandButton icon="ui-icon-pencil" 
+                                                 styleClass="edit_ppe"
+                                                 rendered="#{pruefplanKalenderHandler.renderPPE(2,5,time)}"
+                                                 actionListener="#{pruefplanKalenderHandler.newPPE(2,5,time)}"
+                                                 update=":dialogPanel"
+                                                 oncomplete="dlg_new_ppe.show()"/>                                 
+                                <h:outputText escape="false"
+                                        value="#{pruefplanKalenderHandler.findPPEByTimeAndDayString(2,5,time)}"/>  
+                            </div>
+                        </p:column>                
+                    </p:dataTable> 
+                </h:panelGroup>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{pruefplaneintragHandler.insertOrUpdatePPE()}" 
+                               style="display:none"
+                               update=":form_ppeCalendar:panel_ppeCalendar,:growl"/>
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 update=":form_ppeCalendar:panel_ppeCalendar,:growl" 
+                                 widgetVar="hiddenDelete"/>
+            </p:panel>
+        </h:form>
+            
+        <p:dialog header="Stundenplaneintrag"
+                  widgetVar="dlg_new_ppe"
+                  resizable="true" 
+                  dynamic="true"
+                  closeOnEscape="true">  
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false">
+                    <p:panelGrid columns="2" style="margin-bottom:10px;" styleClass="panelGrid_new_ppe">
+                        <f:facet name="header">
+                            <p:selectOneMenu id="conflictPPE" rendered="#{pruefplanKalenderHandler.render()}"
+                                             value="#{pruefplanKalenderHandler.selectedConflictPPE}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.switchPPE()}"
+                                        update=":dialogPanel"/>
+                                <f:selectItem itemValue="" 
+                                              itemLabel="--- Es gibt Konflikte ---"
+                                              noSelectionOption="true"/>                            
+                                <f:selectItems value="#{pruefplanKalenderHandler.existingConflicts}" 
+                                               var="conflict" 
+                                               itemValue="#{conflict}"
+                                               itemLabel="#{conflict.sgmid.modID.modName} 
+                                               bei #{conflict.erstPruefID.prVorname} #{conflict.erstPruefID.prName} 
+                                               am #{pruefplanTabelleHandler.getDatZeit(conflict)}"/>
+                            </p:selectOneMenu> 
+                            <h:outputText value="Keine Konflikte" rendered="#{!pruefplanKalenderHandler.render()}" />
+                        </f:facet>
+                        <p:outputLabel for="sgAndSem" value="Studiengang/Semester: "/>  
+                        <p:outputPanel id="sgAndSem">
+                            <p:selectOneMenu id="sgNew"
+                                             value="#{pruefplanKalenderHandler.currentStudiengang}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.updateSgmodul}"/>
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        update="sgmodul,pruefungsform,erstpruefer"
+                                        listener="#{pruefplanKalenderHandler.updateErstpruefer()}"/>                                 
+                                <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                               var="sgNew" 
+                                               itemValue="#{sgNew}"
+                                               itemLabel="#{sgNew.SGName}"/>
+                            </p:selectOneMenu>    
+                            <p:selectOneMenu id="semNew"
+                                             value="#{pruefplanKalenderHandler.currentSemester}"
+                                             style="margin-right: 3px"
+                                             onchange="this.blur()">
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        listener="#{pruefplanKalenderHandler.updateSgmodul}"/>
+                                <p:ajax process="@this"
+                                        partialSubmit="true"
+                                        update="sgmodul,pruefungsform,erstpruefer"
+                                        listener="#{pruefplanKalenderHandler.updateErstpruefer()}"/>                                
+                                <f:selectItems value="#{pruefplanKalenderHandler.semester}"/>
+                            </p:selectOneMenu>                             
+                        </p:outputPanel>                        
+                        <p:outputLabel for="sgmodul" value="Modul: " />  
+                        <p:selectOneMenu id="sgmodul"
+                                         value="#{pruefplanKalenderHandler.currentSgmodul}" 
+                                         required="true"
+                                         requiredMessage="Modul ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <p:ajax process="@this"
+                                    partialSubmit="true"
+                                    listener="#{pruefplanKalenderHandler.updateErstpruefer}"
+                                    update="erstpruefer"/>
+                            <f:selectItem itemValue="" itemLabel="Bitte wählen..." noSelectionOption="true"/>
+                            <f:selectItems value="#{pruefplanKalenderHandler.currentModule}" 
+                                           var="sgmodul" 
+                                           itemValue="#{sgmodul}"
+                                           itemLabel="#{sgmodul.modID.modName}"/>
+                        </p:selectOneMenu>                        
+                        <p:outputLabel for="pruefperiode" value="Prüfperiode:" />  
+                        <p:selectOneMenu id="pruefperiode"
+                                         value="#{pruefplanKalenderHandler.currentPruefperiode}"
+                                         required="true"
+                                         requiredMessage="Prüfperiode ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <p:ajax process="@this"
+                                    partialSubmit="true"
+                                    listener="#{pruefplanKalenderHandler.updateMinMaxDate()}"
+                                    update="date"/>
+                            <f:selectItems value="#{pruefperiodenHandler.pruefperioden}" 
+                                           var="pp" 
+                                           itemValue="#{pp}"
+                                           itemLabel="#{pruefperiodenHandler.getAsString(pp)}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel for="date" value="Prüfungstermin:"/>  
+                        <p:calendar id="date" 
+                                    showButtonPanel="true" 
+                                    pattern="dd/MM/yyyy HH:mm" 
+                                    value="#{pruefplanKalenderHandler.currentPPEDatZeit}"
+                                    mindate="#{pruefplanKalenderHandler.minDate}"
+                                    maxdate="#{pruefplanKalenderHandler.maxDate}"
+                                    minHour="8" 
+                                    maxHour="18"
+                                    stepHour="1" 
+                                    stepMinute="5"
+                                    required="true"
+                                    requiredMessage="Prüfungstermin ist ein Pflichtfeld"
+                                    locale="de"
+                                    showWeek="true"/>                        
+                        <p:outputLabel for="erstpruefer" value="Erstprüfer:"/>  
+                        <p:selectOneMenu id="erstpruefer"
+                                         value="#{pruefplanKalenderHandler.currentErstPruefID}" 
+                                         required="true"
+                                         requiredMessage="Erstprüfer ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <f:selectItem itemValue="#{pruefplanKalenderHandler.currentSgmodul.prID}" 
+                                          itemLabel="#{pruefplanKalenderHandler.currentSgmodul.prID.prName},
+                                                     #{pruefplanKalenderHandler.currentSgmodul.prID.prVorname}"/>
+                            <f:selectItems value="#{prueferHandler.pruefer}" 
+                                           var="pr1" 
+                                           itemValue="#{pr1}"
+                                           itemLabel="#{pr1.prName}, #{pr1.prVorname}"/>
+                        </p:selectOneMenu>    
+                        <p:outputLabel for="zweitpruefer" value="Zweitprüfer:" />
+                        <p:selectOneMenu id="zweitpruefer"
+                                         value="#{pruefplanKalenderHandler.currentZweitPruefID}"
+                                         onchange="this.blur()">
+                            <f:selectItem itemLabel="n/a" itemValue=""/>
+                            <f:selectItems value="#{prueferHandler.pruefer}" 
+                                           var="pr2" 
+                                           itemValue="#{pr2}"
+                                           itemLabel="#{pr2.prName}, #{pr2.prVorname}"/>
+                        </p:selectOneMenu>                         
+                        <p:outputLabel for="raum" value="Raum: " />  
+                        <p:selectOneMenu id="raum"
+                                         value="#{pruefplanKalenderHandler.currentRid}"
+                                         onchange="this.blur()">
+                            <f:selectItems value="#{raumHandler.raum}" 
+                                           var="ra" 
+                                           itemValue="#{ra}"
+                                           itemLabel="#{ra.RName}"/>
+                        </p:selectOneMenu>  
+                        <p:outputLabel for="anmeldezahl" value="Anmeldezahl:" />
+                        <p:inputText id="anmeldezahl" value="#{pruefplanKalenderHandler.currentAnmeldeZahl}"/>
+                        <p:outputLabel for="pruefungsform" value="Prüfungsform:" />  
+                        <p:selectOneMenu id="pruefungsform"
+                                         value="#{pruefplanKalenderHandler.currentPfid}" 
+                                         required="true"
+                                         requiredMessage="Prüfungsform ist ein Pflichtfeld"
+                                         onchange="this.blur()">
+                            <f:selectItems value="#{pruefungsformHandler.pruefungsform}" 
+                                           var="pf" 
+                                           itemValue="#{pf}"
+                                           itemLabel="#{pf.PForm}"/>
+                        </p:selectOneMenu>                         
+                        <p:outputLabel for="anmerkung" value="Anmerkung:" />
+                        <p:inputTextarea id="anmerkung"/>
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                             actionListener="#{pruefplanKalenderHandler.findConflicts()}"
+                                             oncomplete="handleInsert(xhr, status, args, 'form_ppeCalendar')"
+                                             update=":form_confirm_insert,:dialogPanel"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                             onclick="dlg_new_ppe.hide()" 
+                                             icon="ui-icon-close"/>
+                        </f:facet>
+                    </p:panelGrid>  
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+        
+        <p:confirmDialog id="confirmInsert" 
+                         header="Prüfungen überschneiden sich"
+                         message="Unter Vorbehalt eintragen?"  
+                         severity="alert" 
+                         widgetVar="dlg_confirm_insert" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_insert">
+                <h:outputText value="Konflikt mit: "/>
+                <p:dataList id="displayMulti" value="#{pruefplanKalenderHandler.newConflicts}" var="conflictPPE">
+                    <h:outputText escape="false"
+                                  value="#{conflictPPE.sgmid.modID.modName} 
+                                  bei #{conflictPPE.erstPruefID.prName} 
+                                  am #{pruefplanTabelleHandler.getDatZeit(conflictPPE)}"/>
+                </p:dataList> 
+                <p:commandButton id="confirm" 
+                                 value="Ja" 
+                                 actionListener="#{pruefplaneintragHandler.insertOrUpdatePPE()}"
+                                 update=":form_ppeCalendar:panel_ppeCalendar,:growl"
+                                 oncomplete="dlg_confirm_insert.hide();dlg_new_ppe.hide()"/> 
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_insert.hide()" type="button"/>  
+            </h:form>
+        </p:confirmDialog>
+        
+        <p:growl id="growl" life="3000" autoUpdate="true"/>  
+    </ui:define>
+</ui:composition>

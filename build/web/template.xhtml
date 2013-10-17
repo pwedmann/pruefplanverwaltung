@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <h:outputStylesheet name="css/core.css" media="screen"/>
+        <h:outputStylesheet name="css/print.css" media="print"/>
+        <!--<link rel="stylesheet" href="../resources/css/print.css" type="text/css" media="print"/>-->
+        <title><h:outputText value="Prüfplanverwaltung"/></title>
+    </h:head>
+    <h:body>
+        <p:layout stateful="false" fullPage="true"> 
+            <p:layoutUnit position="north" size="105" styleClass="header" collapsible="true" closable="true">
+                <div class="dontPrint">
+                    <h1><h:outputText value="Prüfplanverwaltung"/></h1>
+                </div>
+            </p:layoutUnit>  
+
+            <p:layoutUnit position="south" size="35" styleClass="footer" collapsible="true"> 
+                <div class="dontPrint">
+                    <h3><h:outputText value="FH-Bielefeld"/></h3>
+                </div>
+            </p:layoutUnit>  
+            
+            <p:layoutUnit position="west" 
+                          header="Navigation" 
+                          collapsible="true" 
+                          styleClass="navigation" 
+                          style="border:none;" 
+                          closable="true"
+                          >
+                <div class="dontPrint">
+                    <h:form prependId="false">
+                        <ui:insert name="navi">
+                            <ui:include src="navi_login.xhtml"/>
+                        </ui:insert>  
+                    </h:form>
+                </div>
+            </p:layoutUnit>  
+            
+            <p:layoutUnit position="center" style="border:none;">  
+                <div id="content">
+                    <ui:insert name="content">
+                        <ui:include src="index.xhtml"/>
+                    </ui:insert>
+                </div>
+            </p:layoutUnit>  
+        </p:layout>        
+    </h:body>
+</html>

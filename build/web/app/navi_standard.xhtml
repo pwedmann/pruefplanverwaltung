@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui"> 
+    
+    <p:menu>  
+        <p:menuitem value="Startseite" action="overview_standard.xhtml?faces-redirect=true" icon="ui-icon-home" />  
+        <p:menuitem value="Prüfplankalender" action="ppcalendar.xhtml?faces-redirect=true" icon="ui-icon-calendar" />  
+        <p:menuitem value="Prüfplantabelle" action="pptable.xhtml?faces-redirect=true" icon="ui-icon-calculator"/>
+        <p:menuitem value="Druckvorschau" action="print.xhtml?faces-redirect=true"  icon="ui-icon-print"/>
+        <p:menuitem value="Übertragen" action="#" icon="ui-icon-arrowreturnthick-1-e" disabled="true"/>
+        <p:menuitem value="Prüfplan-Check" action="#" icon="ui-icon-check" disabled="true"/>
+        <p:menuitem value="Suchen" action="#" icon="ui-icon-search" disabled="true"/>
+        <p:menuitem value="Abmelden"  immediate="true" action="#{sessionManager.logout}" icon="ui-icon-cancel" ajax="false"/> 
+    </p:menu>     
+
+</ui:composition>

@@ -1,0 +1,183 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui"
+    template="../template.xhtml">
+    
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_print">  
+            <h3><h:outputText value="Druckvorschau" class="dontPrint"/></h3>
+            <h:panelGrid columns="5" class="dontPrint">
+                <p:selectOneMenu id="pperiode"
+                                 value="#{printHandler.currentPruefperiode}">
+                    <f:selectItems value="#{pruefperiodenHandler.getPruefperiodenByWeek(1)}" 
+                                   var="pperiode" 
+                                   itemValue="#{pperiode}"
+                                   itemLabel="#{pperiode.pruefSemester} #{pperiode.PPJahr} #{pperiode.pruefTermin}"/>
+                </p:selectOneMenu>
+                <p:selectOneMenu id="studiengang"
+                                 value="#{printHandler.currentStudiengang}">
+                    <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                   var="sg" 
+                                   itemValue="#{sg}"
+                                   itemLabel="#{sg.SGName}"/>
+                </p:selectOneMenu>  
+                <p:commandButton actionListener="#{printHandler.updatePrint}"
+                                 update="table_print1,table_print2"
+                                 process="@this,pperiode,studiengang"
+                                 partialSubmit="false"
+                                 onclick="this.blur()"
+                                 styleClass="entity_add" 
+                                 icon="ui-icon-refresh"
+                                 value="Aktualisieren"/>
+                <p:commandButton value="Drucken" 
+                                 type="button" 
+                                 icon="ui-icon-print"
+                                 styleClass="entity_add">  
+                    <p:printer target="panel_print" />  
+                </p:commandButton> 
+            </h:panelGrid> 
+            <p:outputPanel id="panel_print">
+                <p:dataTable id="table_print1"
+                             value="#{printHandler.getAllPruefungen(1)}"
+                             var="p"
+                             rowStyleClass="printRow"
+                             tableStyle="max-width: 1000px;
+                             border-collapse: collapse;
+                             border: solid 1px black;
+                             font-size: 11px;
+                             font-family: arial"
+                             emptyMessage="Keine Einträge gefunden.">
+                    <p:columnGroup type="header">  
+                        <p:row>
+                            <p:column colspan="4"
+                                      headerText="#{printHandler.getTableHeader(0)}" 
+                                      style="border:solid 1px;
+                                      background: white;
+                                      border-right: none"/>
+                            <p:column colspan="2" 
+                                      headerText="#{printHandler.getTableHeader(1)}" 
+                                      style="border:solid 1px;
+                                      border-right: none;
+                                      background: white;
+                                      border-left: none;"/>
+                            <p:column colspan="4" 
+                                      headerText="#{printHandler.getTableHeader(2)}" 
+                                      style="border:solid 1px;
+                                      background: white;
+                                      border-left: none"/>
+                        </p:row>
+                        <p:row>  
+                            <p:column headerText="Datum" style="border:solid 1px;background: white;"/> 
+                            <p:column colspan="3" headerText="Fach" style="border:solid 1px;background: white;"/>  
+                            <p:column headerText="Prüfer" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Form" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Dauer" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Zeit" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Raum" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Anm." style="border:solid 1px;background: white;"/>
+                        </p:row>  
+                    </p:columnGroup>   
+                    <p:column style="width: 170px;border:solid 1px;
+                              vertical-align: top;
+                              border-bottom: #{printHandler.getBorderBottom(p,1)}; 
+                              border-top: #{printHandler.getBorderTop(p)}">
+                        <h:outputText value="#{printHandler.getDate(p)}" escape="false"/>
+                    </p:column>
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getModKurz(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 200px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getModul(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getCode(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 200px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getPruefer(p)}" escape="false"/>
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getForm(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getDauer(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getZeit(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getRaum(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getAnm(p)}" />
+                    </p:column>                    
+                </p:dataTable>
+                <p:dataTable id="table_print2"
+                             value="#{printHandler.getAllPruefungen(2)}"
+                             rowStyleClass="printRow"
+                             var="p"
+                             tableStyle="max-width: 1000px;
+                             border-collapse: collapse;
+                             border: solid 1px black;
+                             margin-top: 10px;
+                             font-size: 11px;
+                             font-family: arial"
+                             emptyMessage="Keine Einträge gefunden.">
+                    <p:columnGroup type="header">  
+                        <p:row>  
+                            <p:column headerText="Datum" style="border:solid 1px;background: white;"/> 
+                            <p:column colspan="3" headerText="Fach" style="border:solid 1px;background: white;"/>  
+                            <p:column headerText="Prüfer" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Form" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Dauer" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Zeit" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Raum" style="border:solid 1px;background: white;"/>
+                            <p:column headerText="Anm." style="border:solid 1px;background: white;"/>
+                        </p:row>  
+                    </p:columnGroup>   
+                    <p:column style="width: 170px;border:solid 1px;
+                              vertical-align: top;
+                              border-bottom: #{printHandler.getBorderBottom(p,2)}; 
+                              border-top: #{printHandler.getBorderTop(p)}">
+                        <h:outputText value="#{printHandler.getDate(p)}" escape="false"/>
+                    </p:column>
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getModKurz(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 200px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getModul(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getCode(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 200px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getPruefer(p)}" escape="false"/>
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getForm(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getDauer(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getZeit(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 30px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getRaum(p)}" />
+                    </p:column>                    
+                    <p:column style="width: 20px;border:solid 1px;vertical-align: top">
+                        <h:outputText value="#{printHandler.getAnm(p)}" />
+                    </p:column>                    
+                </p:dataTable> 
+            </p:outputPanel>
+        </h:form>
+    </ui:define>
+</ui:composition>

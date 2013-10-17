@@ -1,0 +1,166 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_mitarbeiter">
+            <p:panel id="panel_mitarbeiter">
+                <h3><h:outputText value="Mitarbeiter"/></h3>
+                <p:dataTable var="mitarbeiter" 
+                             value="#{mitarbeiterHandler.getAllMitarbeiter()}" 
+                             id="table_mitarbeiter" 
+                             selection="#{mitarbeiterHandler.selectedMitarbeiter}"
+                             filteredValue="#{mitarbeiterHandler.filteredMitarbeiter}"
+                             rowKey="#{mitarbeiter.maID}"
+                             rows="25" paginator="true"
+                             sortMode="multiple"
+                             widgetVar="widget_mitarbeiter">
+                    <p:ajax event="rowSelect"
+                            listener="#{mitarbeiterHandler.editMitarbeiter()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_entity.show()"/>                
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{mitarbeiterHandler.newMitarbeiter()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Mitarbeiter" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{mitarbeiterHandler.newMitarbeiter()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Mitarbeiter" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Name" sortBy="#{mitarbeiter.maName}">
+                        <h:outputText value="#{mitarbeiter.maName}, #{mitarbeiter.maVorname}" />
+                    </p:column>
+                    <p:column headerText="Titel" sortBy="#{mitarbeiter.maTitel}">
+                        <h:outputText value="#{mitarbeiter.maTitel}" />
+                    </p:column>
+                    <p:column headerText="Kürzel" sortBy="#{mitarbeiter.maKurz}">
+                        <h:outputText value="#{mitarbeiter.maKurz}" />
+                    </p:column>
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{mitarbeiterHandler.insertOrUpdateMitarbeiter()}" 
+                               style="display:none" 
+                               update=":form_mitarbeiter:panel_mitarbeiter,:form_mitarbeiter:table_mitarbeiter"/>              
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none" 
+                                 actionListener="#{mitarbeiterHandler.deleteMitarbeiter()}" 
+                                 update=":form_mitarbeiter:panel_mitarbeiter,:form_mitarbeiter:table_mitarbeiter"/>    
+            </p:panel>
+        </h:form>
+        
+        <p:dialog header="Mitarbeiter" 
+                  widgetVar="dlg_new_entity" 
+                  resizable="true" 
+                  closeOnEscape="true">
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false">
+                    <p:panelGrid columns="2" style="margin-bottom:10px">  
+                        <f:facet name="header">
+                            <h:outputText value="#{mitarbeiterHandler.getDialogHeader()}"/>
+                        </f:facet>
+                        <p:outputLabel for="maVorname" value="Vorname: " />
+                        <p:inputText id="maVorname" 
+                                     value="#{mitarbeiterHandler.currentMaVorname}" 
+                                     required="true"/>  
+                        <p:outputLabel for="maName" value="Name: " />
+                        <p:inputText id="maName" 
+                                     value="#{mitarbeiterHandler.currentMaName}" 
+                                     required="true"/>
+                        <p:outputLabel for="maTitel" value="Titel: " />
+                        <p:inputText id="maTitel" 
+                                     value="#{mitarbeiterHandler.currentMaTitel}"/>                              
+                        <p:outputLabel for="maKurz" value="Kürzel: " />
+                        <p:inputText id="maKurz" 
+                                     value="#{mitarbeiterHandler.currentMaKurz}"/> 
+                        <p:outputLabel for="sperrDatZeitVon" value="Sperrzeit von: " />  
+                        <p:calendar id="sperrDatZeitVon" 
+                                    stepHour="1" 
+                                    stepMinute="5" 
+                                    showButtonPanel="true" 
+                                    pattern="dd/MM/yyyy HH:mm" 
+                                    value="#{mitarbeiterHandler.currentSperrDatZeitVon}"
+                                    locale="de"/>   
+                        <p:outputLabel for="sperrDatZeitBis" value="Sperrzeit bis: " />
+                        <p:calendar id="sperrDatZeitBis" 
+                                    stepHour="1" 
+                                    stepMinute="5" 
+                                    showButtonPanel="true" 
+                                    pattern="dd/MM/yyyy HH:mm" 
+                                    value="#{mitarbeiterHandler.currentSperrDatZeitBis}"
+                                    locale="de"/>    
+                        <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                              oncomplete="handleInsertSimple(args,'form_mitarbeiter')"
+                                              update=":dialogPanel"
+                                              icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                             onclick="dlg_new_entity.hide()" 
+                                             icon="ui-icon-close"
+                                             type="button"/>  
+                        </f:facet>
+                     </p:panelGrid>
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Mitarbeiter wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" 
+                            value="#{mitarbeiterHandler.selectedMitarbeiter}" 
+                            var="m"
+                            paginator="true"
+                            rows="5">  
+                    <h:outputText value="#{m.maName}, #{m.maVorname}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm"
+                                 value="Ja" 
+                                 oncomplete="handleDelete('form_mitarbeiter')"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()" 
+                                 type="button"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+      
+    </ui:define>
+</ui:composition>
+

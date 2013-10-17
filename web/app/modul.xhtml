@@ -1,0 +1,235 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    template="../template.xhtml"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:cc="http://java.sun.com/jsf/composite"
+    xmlns:p="http://primefaces.org/ui">
+    <ui:define name="navi">
+        <ui:include src="#{sessionManager.navi}"/>
+    </ui:define>
+    <ui:define name="content">
+        <h:outputScript name="js/js.js"/>
+        <h:form id="form_sgmodul">
+            <p:panel id="panel_sgmodul">
+                <h3><h:outputText value="Module"/></h3>
+                <p:dataTable var="sgmodul" 
+                             value="#{sgmodulHandler.getAllSgmodul()}" 
+                             id="table_sgmodul" 
+                             selection="#{sgmodulHandler.selectedSgmodul}"
+                             filteredValue="#{sgmodulHandler.filteredSgmodul}"
+                             rowKey="#{sgmodul.sgmid}"
+                             rows="25" 
+                             paginator="true"
+                             sortMode="multiple"
+                             widgetVar="widget_sgmodul">
+                    <p:ajax event="rowSelect"
+                            listener="#{sgmodulHandler.editSgmodul()}"
+                            update=":dialogPanel"  
+                            oncomplete="dlg_new_entity.show()"/>                
+                    <f:facet name="header">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{sgmodulHandler.newSgmodul()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Modul" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet> 
+                    <f:facet name="footer">  
+                        <div class="entity_table_header">
+                            <p:commandButton icon="ui-icon-closethick"  
+                                             onclick="dlg_confirm_delete.show()"
+                                             styleClass="entity_remove" 
+                                             value="Ausgewählte löschen" 
+                                             update=":form_confirm_delete:displayMulti"/>
+                            <p:commandButton icon="ui-icon-plusthick" 
+                                             oncomplete="dlg_new_entity.show()"
+                                             actionListener="#{sgmodulHandler.newSgmodul()}"
+                                             styleClass="entity_add" 
+                                             value="Neuer Modul" 
+                                             update=":dialogPanel"/>  
+                        </div>
+                    </f:facet>                 
+                    <p:column selectionMode="multiple" style="width:2%" />           
+                    <p:column headerText="Name" sortBy="#{sgmodul.modID.modName}">
+                        <h:outputText value="#{sgmodul.modID.modName}" />
+                    </p:column>
+                    <p:column headerText="Kürzel" sortBy="#{sgmodul.modID.modKuerzel}">
+                        <h:outputText value="#{sgmodul.modID.modKuerzel}" />
+                    </p:column>
+                    <p:column headerText="Studiengang" sortBy="#{sgmodul.sgid.SGName}">
+                        <h:outputText value="#{sgmodul.sgid.SGName}" />
+                    </p:column>
+                    <p:column headerText="Code" sortBy="#{sgmodul.modID.pcid.prCode}">
+                        <h:outputText value="#{sgmodul.modID.pcid.prCode} #{sgmodul.modID.pcid.prForm}"/>
+                    </p:column>                    
+                    <p:column headerText="Prüfer" sortBy="#{sgmodul.prID.prName}">
+                        <h:outputText value="#{prueferHandler.getAsString(sgmodul.prID)}" />
+                    </p:column>                    
+                    <p:column headerText="Semester" sortBy="#{sgmodul.modSem}">
+                        <h:outputText value="#{sgmodul.modSem}" />
+                    </p:column>                    
+                    <p:column headerText="Prüfleistung" sortBy="#{sgmodul.pruefLeistung}">
+                        <h:outputText value="#{sgmodul.pruefLeistung}" />
+                    </p:column>                    
+                    <p:column headerText="Nicht geprüft im" sortBy="#{sgmodul.nichtGeprueft}">
+                        <h:outputText value="#{sgmodulHandler.getPruefDateAsString(sgmodul)}" />
+                    </p:column> 
+                    <p:column headerText="Gruppe" sortBy="#{sgmodul.modGrp}">
+                        <h:outputText value="#{sgmodul.modGrp}" />
+                    </p:column>                      
+                </p:dataTable>
+                <p:commandLink id="hiddenInsert" 
+                               actionListener="#{sgmodulHandler.insertOrUpdateSgmodul()}" 
+                               style="display:none" 
+                               update=":form_sgmodul:panel_sgmodul,:form_sgmodul:table_sgmodul"/>              
+                <p:commandButton id="hiddenDelete"
+                                 style="display:none"
+                                 update=":form_sgmodul:panel_sgmodul,:form_sgmodul:table_sgmodul"/>    
+            </p:panel>
+        </h:form>
+        
+        <p:dialog header="Modul" 
+                  widgetVar="dlg_new_entity" 
+                  resizable="true" 
+                  closeOnEscape="true">
+            <p:outputPanel id="dialogPanel">
+                <h:form prependId="false">
+                    <p:panelGrid columns="2" style="margin-bottom:10px">
+                        <f:facet name="header">
+                            <h:outputText value="#{sgmodulHandler.getDialogHeader()}"/>
+                        </f:facet>                           
+                        <p:outputLabel for="name" value="Modulname " />
+                        <p:inputText id="name" 
+                                     value="#{sgmodulHandler.currentModName}" 
+                                     required="true"
+                                     size="#{sgmodulHandler.currentModName.length()}"/>  
+                        <p:outputLabel for="kurz" value="Kürzel: " />
+                        <p:inputText id="kurz" 
+                                     value="#{sgmodulHandler.currentModKuerzel}" 
+                                     required="true"
+                                     size="#{sgmodulHandler.currentModKuerzel.length()}"/>
+                        <p:outputLabel for="pc" 
+                                       value="Prüfcode: " 
+                                       rendered="#{sgmodulHandler.currentSgmodul != null}"/>
+                        <p:selectOneMenu id="pc"
+                                         value="#{sgmodulHandler.currentPcid}"
+                                         onchange="this.blur()"
+                                         rendered="#{sgmodulHandler.currentSgmodul != null}">
+                            <f:selectItems value="#{pruefcodesHandler.pruefcodes}" 
+                                           var="pc" 
+                                           itemValue="#{pc}"
+                                           itemLabel="#{pruefcodesHandler.getAsString(pc)}"/> <!-- getAsString + new pcode -->
+                        </p:selectOneMenu>  
+                        <p:outputLabel for="sg" value="Studiengang: " />
+                        <p:selectOneMenu id="sg"
+                                         value="#{sgmodulHandler.currentStudiengang}"
+                                         onchange="this.blur()"
+                                         required="true">
+                            <f:selectItems value="#{studiengangHandler.studiengang}" 
+                                           var="sg" 
+                                           itemValue="#{sg}"
+                                           itemLabel="#{sg.SGName}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel for="pr" value="Prüfer: " />
+                        <p:selectOneMenu id="pr"
+                                         value="#{sgmodulHandler.currentPruefer}"
+                                         onchange="this.blur()"
+                                         required="true">
+                            <f:selectItems value="#{prueferHandler.pruefer}" 
+                                           var="pr" 
+                                           itemValue="#{pr}"
+                                           itemLabel="#{prueferHandler.getAsString(pr)}"/>
+                        </p:selectOneMenu>   
+                        <p:outputLabel for="sem" value="Semester: " />
+                        <p:selectOneMenu id="sem"
+                                         value="#{sgmodulHandler.currentModSemester}"
+                                         onchange="this.blur()">
+                            <f:selectItems value="#{sgmodulHandler.getSemester().entrySet()}"
+                                           var="entry"
+                                           itemValue="#{entry.key}" 
+                                           itemLabel="#{entry.value}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel for="pl" value="Pruefleistung: " />
+                        <p:selectOneMenu id="pl"
+                                         value="#{sgmodulHandler.currentPruefleistung}"
+                                         onchange="this.blur()"
+                                         required="true">
+                            <f:selectItems value="#{sgmodulHandler.getPruefleistung().entrySet()}"
+                                           var="entry"
+                                           itemValue="#{entry.key}" 
+                                           itemLabel="#{entry.value}"/>
+                        </p:selectOneMenu>  
+                        <p:outputLabel for="pd" value="Wird geprüft in: " />
+                        <p:selectOneMenu id="pd"
+                                         value="#{sgmodulHandler.currentPruefDate}"
+                                         onchange="this.blur()"
+                                         required="true">
+                            <f:selectItems value="#{sgmodulHandler.getPruefDates().entrySet()}"
+                                           var="entry"
+                                           itemValue="#{entry.key}" 
+                                           itemLabel="#{entry.value}"/>
+                        </p:selectOneMenu>                          
+                        <p:outputLabel for="group" value="Modulgruppe: " />
+                        <p:inputText id="group" 
+                                     value="#{sgmodulHandler.currentModGroup}"/>  
+                        <p:outputLabel for="note" value="Anmerkung: " />
+                        <p:inputTextarea id="note" 
+                                     value="#{sgmodulHandler.currentSgmNotiz}"/>                        
+                         <f:facet name="footer">
+                            <p:commandButton value="Speichern" 
+                                              oncomplete="handleInsertSimple(args,'form_sgmodul')"
+                                              update=":dialogPanel"
+                                              icon="ui-icon-check"/>
+                            <p:commandButton value="Abbrechen" 
+                                             onclick="dlg_new_entity.hide()" 
+                                             icon="ui-icon-close"
+                                             type="button"/> 
+                         </f:facet>
+                    </p:panelGrid>
+                    <p:panelGrid>
+                        
+                    </p:panelGrid>
+                </h:form>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:confirmDialog id="confirmDialog" 
+                         message="Ausgewählte Module wirklich löschen?"  
+                         header="Einträge löschen" 
+                         severity="alert" 
+                         widgetVar="dlg_confirm_delete" 
+                         closeOnEscape="true" 
+                         appendToBody="true">  
+            <h:form id="form_confirm_delete">
+                <p:dataList id="displayMulti" 
+                            value="#{sgmodulHandler.selectedSgmodul}" 
+                            var="sgm"
+                            paginator="true"
+                            rows="5">  
+                    <h:outputText value="#{sgmodulHandler.getAsString(sgm)}"/>  
+                </p:dataList> 
+                <p:commandButton id="confirm"
+                                 value="Ja" 
+                                 action="#{sgmodulHandler.deleteSgmodul()}" 
+                                 oncomplete="handleDelete('form_sgmodul')"
+                                 icon="ui-icon-check"/>  
+                <p:commandButton id="decline" 
+                                 value="Nein" 
+                                 onclick="dlg_confirm_delete.hide()" 
+                                 type="button"
+                                 icon="ui-icon-close"/>  
+            </h:form>
+        </p:confirmDialog>
+      
+    </ui:define>
+</ui:composition>
+
